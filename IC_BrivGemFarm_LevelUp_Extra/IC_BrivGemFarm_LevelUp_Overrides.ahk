@@ -403,6 +403,8 @@ class IC_BrivGemFarm_LevelUp_Added_Class ; Added to IC_BrivGemFarm_Class
             }
             if (champID != champIDInSeat)
                 continue
+            else if(((targetLevel - g_SF.Memory.ReadChampLvlByID(champID)) / 100 >= 1) AND this.BGFLU_LevelUpChamp(champID, targetLevel, False))
+                return false
             else if (this.BGFLU_LevelUpChamp(champID, targetLevel, True)) 
                 return false
             this.Levelupx25.delete(champID)
