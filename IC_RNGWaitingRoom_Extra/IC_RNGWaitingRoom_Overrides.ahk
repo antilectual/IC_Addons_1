@@ -102,7 +102,7 @@ class IC_RNGWaitingRoom_SharedFunctions_Added_Class ; Added to IC_BrivSharedFunc
             g_SharedData.LoopString := "Elly Wait: " . A_TickCount - timeoutTimer.StartTime
             if(g_BrivGemFarm.BGFLU_DoPartySetupMin())
                 minFailCount += 1
-            if(minCount >= 4)
+            if(minFailCount >= 4)
                 g_BrivGemFarm.BGFLU_DoPartySetupMax()
             Sleep, 30
         }
