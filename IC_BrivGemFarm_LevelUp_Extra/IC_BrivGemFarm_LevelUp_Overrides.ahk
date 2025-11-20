@@ -65,7 +65,7 @@ class IC_BrivGemFarm_LevelUp_Class extends IC_BrivGemFarm_Class
     GemFarmResetSetup(formationModron := "", doBasePartySetup := False)
     {
         g_SharedData.BGFLU_SetStatus("Leveling champions to the minimum level")
-        this.SetupMaxDone := false
+        this.FormationLevelingLock := false
         this.SetupFailedConversionDone := true
         resetsCount := base.GemFarmResetSetup(formationModron, doBasePartySetup := False)
         if(this.GemFarmShouldSetFormation())
@@ -73,7 +73,6 @@ class IC_BrivGemFarm_LevelUp_Class extends IC_BrivGemFarm_Class
         this.BGFLU_DoPartySetupMin(g_BrivUserSettingsFromAddons[ "BGFLU_ForceBrivEllywick" ]) ; level forced champions (briv/ellywick), then other minlevel champs
         this.BGFLU_DoPartyWaits(formationModron)
         this.Levelupx25 := {} 
-        this.BGLU_DoneLeveling := False 
         g_SF.FormationSwitchLock := False
         g_SF.ToggleAutoProgress( 1, false, true )
         return resetsCount
@@ -85,17 +84,17 @@ class IC_BrivGemFarm_LevelUp_Class extends IC_BrivGemFarm_Class
         needToStack := this.BGFLU_NeedToStack()
         ; Level up Briv to MaxLevel after stacking
         if (!needToStack AND g_SF.Memory.ReadChampLvlByID(ActiveEffectKeySharedFunctions.Briv.HeroID) < g_BrivUserSettingsFromAddons[ "BGFLU_BrivGemFarm_LevelUp_Settings" ].maxLevels[ActiveEffectKeySharedFunctions.Briv.HeroID])
-            this.SetupMaxDone := false
+            this.FormationLevelingLock := false
         ; Check for failed stack conversion
         if (g_BrivUserSettingsFromAddons[ "BGFLU_LevelToSoftCapFailedConversion" ] AND g_SF.Memory.ReadHasteStacks() < 50 AND needToStack)
             this.SetupFailedConversionDone := false
-        if (!this.SetupMaxDone AND currentZone > 5 AND !g_SF.FormationLevelingLock) ; ignore doing max at setup since this method runs first.
-            this.SetupMaxDone := this.BGFLU_DoPartySetupMax() ; Level up all champs to the specified max level
+        if (currentZone > 5 AND !g_SF.FormationLevelingLock) ; ignore doing max at setup since this method runs first.
+            this.BGFLU_DoPartySetupMax() ; Level up all champs to the specified max level
         else if (!this.SetupFailedConversionDone)
             this.SetupFailedConversionDone := this.BGFLU_DoPartySetupFailedConversion() ; Level up all champs to soft cap (including Briv if option checked)
         if (g_SharedData.BGFLU_UpdateMaxLevels) 
         {
-            this.SetupMaxDone := false ; Trigger start max leveling
+            this.FormationLevelingLock := false ; Trigger start max leveling
             g_SharedData.BGFLU_UpdateMaxLevels := false
             ; Stop click spam
             if (!g_BrivUserSettingsFromAddons[ "BGFLU_ClickDamageSpam" ])
@@ -246,6 +245,8 @@ class IC_BrivGemFarm_LevelUp_Added_Class ; Added to IC_BrivGemFarm_Class
         g_SF.ModronResetZone := g_SF.Memory.GetModronResetArea()
         if (!g_BrivUserSettingsFromAddons[ "BGFLU_SkipMinDashWait" ] AND g_SF.ShouldDashWait())
             g_SF.DoDashWait( Max(g_SF.ModronResetZone - g_BrivUserSettings[ "DashWaitBuffer" ], 0) )
+        this.BGFLU_DoPartySetupMin(g_BrivUserSettingsFromAddons[ "BGFLU_ForceBrivEllywick" ])
+        g_SF.FormationLevelingLock := False
         if (g_SF.IsChampInFormation(ActiveEffectKeySharedFunctions.Thellora.HeroID, formation))
             g_SF.DoRushWait()
     }
@@ -330,10 +331,10 @@ class IC_BrivGemFarm_LevelUp_Added_Class ; Added to IC_BrivGemFarm_Class
     */
     BGFLU_DoPartySetupMax(formation := "")
     {
-        if(this.BGLU_DoneLeveling)
-            return true
+        if(this.FormationLevelingLock)
+            return
+        levelBriv := True
         ; Speed champions without Briv
-        levelBriv := true ; Return value
         updateLoopString := !g_SF.FormationSwitchLock AND g_SF.Memory.ReadMostRecentFormationFavorite() != 2
         if(updateLoopString) ; don't show leveling string before ellywait finishes or when stacking.
             g_SharedData.LoopString .= " - Party setup Max" ; Will be added multiple times if not cleared in previous function after returning.
@@ -355,7 +356,7 @@ class IC_BrivGemFarm_LevelUp_Added_Class ; Added to IC_BrivGemFarm_Class
                 if (this.ChampIDs[champID] == champID) ; Is speed champ
                 {
                     if (g_SF.FormationLevelingLock)
-                        return false
+                        return
                     targetLevel := this.CalculateTargetLevel(champID)
                     if (champID == g_SF.Memory.ReadSelectedChampIDBySeat(g_SF.Memory.ReadChampSeatByID(champID)) && !this.BGFLU_LevelUpChamp(champID, targetLevel)) ; champ in seat and leveling them is successful (at or over target level)
                         break ; do once per call
@@ -374,15 +375,15 @@ class IC_BrivGemFarm_LevelUp_Added_Class ; Added to IC_BrivGemFarm_Class
             if (champID == 58 AND this.BGFLU_NeedToStack())
                 targetLevel := g_BrivUserSettingsFromAddons[ "BGFLU_BrivMinLevelStacking" . (g_BrivGemFarm.ShouldOfflineStack() ? "" : "Online") ]
             if (this.BGFLU_LevelUpChamp(champID, targetLevel))
-                return false
+                return
         }
         levelBriv := levelBriv AND this.DoX25Leveling()
         if (levelBriv)
         {
-            this.BGLU_DoneLeveling := True
+            this.FormationLevelingLock := True
             g_SharedData.BGFLU_SetStatus("All champions leveled up.")
         }
-        return levelBriv
+        return
     }
 
     ; Returns True if all champs are done with x25, false if champs still need leveling.

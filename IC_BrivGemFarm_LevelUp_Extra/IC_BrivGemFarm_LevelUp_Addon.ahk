@@ -7,5 +7,4 @@ SH_UpdateClass.AddClassFunctions(g_BrivGemFarm, IC_BrivGemFarm_LevelUp_Added_Cla
 SH_UpdateClass.AddClassFunctions(g_SF, IC_BrivGemFarm_LevelUp_SharedFunctions_Added_Class)
 SH_UpdateClass.AddClassFunctions(g_SF.Memory, IC_BrivGemFarm_LevelUp_IC_MemoryFunctions_Added_Class)
 SH_UpdateClass.AddClassFunctions(g_SharedData, IC_BrivGemFarm_LevelUp_IC_SharedData_Added_Class)
-g_BrivGemFarm["SetupMaxDone"] := False
 g_BrivGemFarm["SetupFailedConversionDone"] := True
