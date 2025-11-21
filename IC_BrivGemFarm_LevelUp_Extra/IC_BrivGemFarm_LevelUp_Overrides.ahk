@@ -7,6 +7,7 @@ class IC_BrivGemFarm_LevelUp_Class extends IC_BrivGemFarm_Class
 {
     Levelupx25 := {}
     ChampIDs := {}
+    ExtraChamps := {}
 
     InitChamps()
     {
@@ -71,8 +72,9 @@ class IC_BrivGemFarm_LevelUp_Class extends IC_BrivGemFarm_Class
         if(this.GemFarmShouldSetFormation())
             g_SF.SetFormationForStart()
         this.BGFLU_DoPartySetupMin(g_BrivUserSettingsFromAddons[ "BGFLU_ForceBrivEllywick" ]) ; level forced champions (briv/ellywick), then other minlevel champs
-        this.BGFLU_DoPartyWaits(formationModron)
         this.Levelupx25 := {} 
+        this.ExtraChamps := {}
+        this.BGFLU_DoPartyWaits(formationModron)
         g_SF.FormationSwitchLock := False
         g_SF.ToggleAutoProgress( 1, false, true )
         return resetsCount
@@ -339,7 +341,16 @@ class IC_BrivGemFarm_LevelUp_Added_Class ; Added to IC_BrivGemFarm_Class
         if(updateLoopString) ; don't show leveling string before ellywait finishes or when stacking.
             g_SharedData.LoopString .= " - Party setup Max" ; Will be added multiple times if not cleared in previous function after returning.
         if (!formation)
-            formation := g_SF.GetInitialFormation()
+        {
+            formation := g_SF.GetInitialFormation() ; probably modron
+            if(this.ExtraChamps.Count() == 0 and formation != "")
+            {  
+                qFormation := this.BGFLU_GetFormationNoEmptySlots(g_SF.Memory.GetFormationByFavorite(1))
+                for k,v in qFormation
+                    if(!g_SF.IsChampInFormation(v, formation))
+                        this.ExtraChamps.push(v)
+            }
+        }
         formation := this.BGFLU_GetFormationNoEmptySlots(formation)
         if (this.BGFLU_ChampUnderTargetLevel(ActiveEffectKeySharedFunctions.Briv.HeroID, this.BGFLU_GetTargetLevel(ActiveEffectKeySharedFunctions.Briv.HeroID, "Min")))
         {
@@ -374,10 +385,22 @@ class IC_BrivGemFarm_LevelUp_Added_Class ; Added to IC_BrivGemFarm_Class
                 continue
             if (champID == 58 AND this.BGFLU_NeedToStack())
                 targetLevel := g_BrivUserSettingsFromAddons[ "BGFLU_BrivMinLevelStacking" . (g_BrivGemFarm.ShouldOfflineStack() ? "" : "Online") ]
-            if (this.BGFLU_LevelUpChamp(champID, targetLevel))
+            if (!this.BGFLU_LevelUpChamp(champID, targetLevel))
                 return
         }
-        levelBriv := levelBriv AND this.DoX25Leveling()
+        ; complete extra champion leveling
+        for k, champID in this.ExtraChamps
+        {
+            if (champID != g_SF.Memory.ReadSelectedChampIDBySeat(g_SF.Memory.ReadChampSeatByID(champID)))
+                continue
+            targetLevel := this.CalculateTargetLevel(champID)
+            if (this.BGFLU_LevelUpChamp(champID, targetLevel))
+            {
+                this.ExtraChamps.delete(k)
+                return
+            }
+        }
+        levelBriv := levelBriv AND this.DoX25Leveling() AND this.ExtraChamps.Count() == 0
         if (levelBriv)
         {
             this.FormationLevelingLock := True
@@ -403,10 +426,10 @@ class IC_BrivGemFarm_LevelUp_Added_Class ; Added to IC_BrivGemFarm_Class
             }
             if (champID != champIDInSeat)
                 continue
-            else if(((targetLevel - g_SF.Memory.ReadChampLvlByID(champID)) / 100 >= 1) AND this.BGFLU_LevelUpChamp(champID, targetLevel, False))
-                return false
-            else if (this.BGFLU_LevelUpChamp(champID, targetLevel, True)) 
-                return false
+            else if(((targetLevel - g_SF.Memory.ReadChampLvlByID(champID)) / 100 >= 1) AND !this.BGFLU_LevelUpChamp(champID, targetLevel, False))
+                return false ; return false if leveled up conventionally and is still underleveled.
+            else if (!this.BGFLU_LevelUpChamp(champID, targetLevel, True)) 
+                return false ; return false if still under leveled
             this.Levelupx25.delete(champID)
         }
         if (!g_SF.ArrSize(this.Levelupx25) > 0) ; done leveling
@@ -459,7 +482,7 @@ class IC_BrivGemFarm_LevelUp_Added_Class ; Added to IC_BrivGemFarm_Class
         modronFormation := g_SF.Memory.GetActiveModronFormation() ; required as a champ not in modron will never be seen as max because it can't upgrade past its specialization.
         for k, champID in formation
             if (g_SF.IsChampInFormation(champID, formation) AND g_SF.IsChampInFormation(champID, modronFormation) AND (champID != 58 OR g_BrivUserSettingsFromAddons[ "BGFLU_LevelToSoftCapFailedConversionBriv" ]))
-                if (this.BGFLU_LevelUpChamp(champID, g_SF.BGFLU_GetLastUpgradeLevel(champID)))
+                if (!this.BGFLU_LevelUpChamp(champID, g_SF.BGFLU_GetLastUpgradeLevel(champID)))
                     return false
         g_SharedData.BGFLU_SetStatus("Finished leveling champions.")
         return true
@@ -594,7 +617,7 @@ class IC_BrivGemFarm_LevelUp_Added_Class ; Added to IC_BrivGemFarm_Class
         return ids
     }
 
-    ; Returns TRUE if champ is done leveling, FALSE if not.
+    ; Returns TRUE if champ has leveled to completion. Otherwise false.
     BGFLU_LevelUpChamp(champID, target, isX25 := False)
     {
         if (this.BGFLU_ChampUnderTargetLevel(champID, target))
@@ -610,8 +633,10 @@ class IC_BrivGemFarm_LevelUp_Added_Class ; Added to IC_BrivGemFarm_Class
             needsLeveling := this.BGFLU_ChampUnderTargetLevel(champID, target)
             if (!needsLeveling)
                 return true
+            else
+                return false
         }
-        return false
+        return true
     }
 
     BGFLU_GetFKey(champID)
