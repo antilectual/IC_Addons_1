@@ -338,6 +338,7 @@ class IC_BrivGemFarm_LevelUp_Added_Class ; Added to IC_BrivGemFarm_Class
         levelBriv := True
         ; Speed champions without Briv
         updateLoopString := !g_SF.FormationSwitchLock AND g_SF.Memory.ReadMostRecentFormationFavorite() != 2
+        this.SetPreviousLootString()
         if(updateLoopString) ; don't show leveling string before ellywait finishes or when stacking.
             g_SharedData.LoopString .= " - Party setup Max" ; Will be added multiple times if not cleared in previous function after returning.
         if (!formation)
@@ -367,7 +368,7 @@ class IC_BrivGemFarm_LevelUp_Added_Class ; Added to IC_BrivGemFarm_Class
                 if (this.ChampIDs[champID] == champID) ; Is speed champ
                 {
                     if (g_SF.FormationLevelingLock)
-                        return
+                        return this.ResetToPreviousLootString()
                     targetLevel := this.CalculateTargetLevel(champID)
                     if (champID == g_SF.Memory.ReadSelectedChampIDBySeat(g_SF.Memory.ReadChampSeatByID(champID)) && !this.BGFLU_LevelUpChamp(champID, targetLevel)) ; champ in seat and leveling them is successful (at or over target level)
                         break ; do once per call
@@ -386,7 +387,7 @@ class IC_BrivGemFarm_LevelUp_Added_Class ; Added to IC_BrivGemFarm_Class
             if (champID == 58 AND this.BGFLU_NeedToStack())
                 targetLevel := g_BrivUserSettingsFromAddons[ "BGFLU_BrivMinLevelStacking" . (g_BrivGemFarm.ShouldOfflineStack() ? "" : "Online") ]
             if (!this.BGFLU_LevelUpChamp(champID, targetLevel))
-                return
+                return this.ResetToPreviousLootString()
         }
         ; complete extra champion leveling
         for k, champID in this.ExtraChamps
@@ -397,7 +398,7 @@ class IC_BrivGemFarm_LevelUp_Added_Class ; Added to IC_BrivGemFarm_Class
             if (this.BGFLU_LevelUpChamp(champID, targetLevel))
             {
                 this.ExtraChamps.delete(k)
-                return
+                return this.ResetToPreviousLootString()
             }
         }
         levelBriv := levelBriv AND this.DoX25Leveling() AND this.ExtraChamps.Count() == 0
@@ -406,7 +407,7 @@ class IC_BrivGemFarm_LevelUp_Added_Class ; Added to IC_BrivGemFarm_Class
             this.FormationLevelingLock := True
             g_SharedData.BGFLU_SetStatus("All champions leveled up.")
         }
-        return
+        return this.ResetToPreviousLootString()
     }
 
     ; Returns True if all champs are done with x25, false if champs still need leveling.
