@@ -345,9 +345,9 @@ class IC_BrivGemFarm_LevelUp_Added_Class ; Added to IC_BrivGemFarm_Class
             formation := g_SF.GetInitialFormation() ; probably modron
             if(this.ExtraChamps.Count() == 0 and formation != "")
             {  
-                qFormation := this.BGFLU_GetFormationNoEmptySlots(g_SF.Memory.GetFormationByFavorite(1))
+                qFormation := g_SF.Memory.GetFormationByFavorite(1)
                 for k,v in qFormation
-                    if(!g_SF.IsChampInFormation(v, formation))
+                    if(v > 0 AND !g_SF.IsChampInFormation(v, formation))
                         this.ExtraChamps.push(v)
             }
         }
