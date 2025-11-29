@@ -172,7 +172,10 @@ class IC_BrivGemFarm_LevelUp_Added_Class ; Added to IC_BrivGemFarm_Class
     {
         currentZone := g_SF.Memory.ReadCurrentZone()
         if(!g_SF.FormationSwitchLock) ; don't show leveling string before ellywait.
+        {
+            this.SetPreviousLoopString()
             g_SharedData.LoopString .= " - Party setup Min"
+        }
         if (forceBrivEllywick || currentZone == 1)
             g_SF.ToggleAutoProgress( 0, false, true )
         if(initialFormation == "")
@@ -194,10 +197,14 @@ class IC_BrivGemFarm_LevelUp_Added_Class ; Added to IC_BrivGemFarm_Class
             remainingTime := timeout - (A_TickCount - StartTime)
         g_SF.DirectedInput(hold := 0,, keyspam*) ; keysup
         if (forceBrivEllywick AND remainingTime > 0)
+        {
+            this.ResetToPreviousLoopString()
             this.BGFLU_DoPartySetupMin(false, remainingTime, formation) ; do normal after do forced.
+        }
         if (currentZone == 1 || g_SharedData.TriggerStart)
             g_SF.BGFLU_DoClickDamageSetup(, this.BGFLU_GetClickDamageTargetLevel(), Max(remainingTime, 2000))
         ; Click damage (should be enough to kill monsters at the area Thellora jumps to unless using x1)
+        this.ResetToPreviousLoopString()
         return keyspam == {}
     }
 
@@ -338,7 +345,7 @@ class IC_BrivGemFarm_LevelUp_Added_Class ; Added to IC_BrivGemFarm_Class
         levelBriv := True
         ; Speed champions without Briv
         updateLoopString := !g_SF.FormationSwitchLock AND g_SF.Memory.ReadMostRecentFormationFavorite() != 2
-        this.SetPreviousLootString()
+        this.SetPreviousLoopString()
         if(updateLoopString) ; don't show leveling string before ellywait finishes or when stacking.
             g_SharedData.LoopString .= " - Party setup Max" ; Will be added multiple times if not cleared in previous function after returning.
         if (!formation)
@@ -368,7 +375,7 @@ class IC_BrivGemFarm_LevelUp_Added_Class ; Added to IC_BrivGemFarm_Class
                 if (this.ChampIDs[champID] == champID) ; Is speed champ
                 {
                     if (g_SF.FormationLevelingLock)
-                        return this.ResetToPreviousLootString()
+                        return this.ResetToPreviousLoopString()
                     targetLevel := this.CalculateTargetLevel(champID)
                     if (champID == g_SF.Memory.ReadSelectedChampIDBySeat(g_SF.Memory.ReadChampSeatByID(champID)) && !this.BGFLU_LevelUpChamp(champID, targetLevel)) ; champ in seat and leveling them is successful (at or over target level)
                         break ; do once per call
@@ -387,7 +394,7 @@ class IC_BrivGemFarm_LevelUp_Added_Class ; Added to IC_BrivGemFarm_Class
             if (champID == 58 AND this.BGFLU_NeedToStack())
                 targetLevel := g_BrivUserSettingsFromAddons[ "BGFLU_BrivMinLevelStacking" . (g_BrivGemFarm.ShouldOfflineStack() ? "" : "Online") ]
             if (!this.BGFLU_LevelUpChamp(champID, targetLevel))
-                return this.ResetToPreviousLootString()
+                return this.ResetToPreviousLoopString()
         }
         ; complete extra champion leveling
         for k, champID in this.ExtraChamps
@@ -398,7 +405,7 @@ class IC_BrivGemFarm_LevelUp_Added_Class ; Added to IC_BrivGemFarm_Class
             if (this.BGFLU_LevelUpChamp(champID, targetLevel))
             {
                 this.ExtraChamps.delete(k)
-                return this.ResetToPreviousLootString()
+                return this.ResetToPreviousLoopString()
             }
         }
         levelBriv := levelBriv AND this.DoX25Leveling() AND this.ExtraChamps.Count() == 0
@@ -407,7 +414,7 @@ class IC_BrivGemFarm_LevelUp_Added_Class ; Added to IC_BrivGemFarm_Class
             this.FormationLevelingLock := True
             g_SharedData.BGFLU_SetStatus("All champions leveled up.")
         }
-        return this.ResetToPreviousLootString()
+        return this.ResetToPreviousLoopString()
     }
 
     ; Returns True if all champs are done with x25, false if champs still need leveling.
