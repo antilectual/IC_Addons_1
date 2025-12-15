@@ -29,10 +29,12 @@ class IC_BrivGemFarm_BrivFeatSwap_SharedFunctions_Class extends IC_SharedFunctio
     ; a method to swap formations and cancel briv's jump animation.
     SetFormation(settings := "", forceCheck := False)
     {
+        g_SharedData.LoopString := "Setting Formation"
         if (!g_BrivUserSettingsFromAddons[ "BGFBFS_Enabled" ])
             return base.SetFormation(settings)
         if(settings != "")
             this.Settings := settings
+        formationToSwapTo := ""
         ; Not refreshed if for DoDashWait() is skipped
         if (ActiveEffectKeySharedFunctions.Briv.BrivUnnaturalHasteHandler.ReadSkipAmount() == "")
             this.Memory.ActiveEffectKeyHandler.Refresh(ActiveEffectKeySharedFunctions.Briv.BrivUnnaturalHasteHandler.EffectKeyString)   
@@ -52,7 +54,7 @@ class IC_BrivGemFarm_BrivFeatSwap_SharedFunctions_Class extends IC_SharedFunctio
         if (currentZone == 1)
             return
         if (!IC_BrivGemFarm_Class.BrivFunctions.HasSwappedFavoritesThisRun OR forceCheck)
-            isFormation2 := this.IsCurrentFormationLazy(this.Memory.GetFormationByFavorite(2), 2)
+            isFormation2 := this.IsCurrentFormationLazy(this.Memory.GetFormationByFavorite(2))
         else
             isFormation2 := this.Memory.ReadMostRecentFormationFavorite() == 2 ; (watch for fix for changing on failed swap)
         ; check to swap briv from favorite 2 to another (W to Q or E)
@@ -72,11 +74,11 @@ class IC_BrivGemFarm_BrivFeatSwap_SharedFunctions_Class extends IC_SharedFunctio
         
               ; Q OR E depending on route.
             if (this.UnBenchBrivConditions(this.Settings))
-                this.DoSwitchFormation(1)
+                this.DoSwitchFormation(formationToSwapTo := 1)
             else if (this.BenchBrivConditions(this.Settings))
-                this.DoSwitchFormation(3)
+                this.DoSwitchFormation(formationToSwapTo := 3)
         }
-        if(g_BrivGemFarm.IsInModronFormation AND !this.IsCurrentFormationLazy(g_SF.Memory.GetActiveModronFormation(), 2))
+        if(g_BrivGemFarm.IsInModronFormation AND formationToSwapTo != "" AND !this.IsCurrentFormationLazy(g_SF.Memory.GetActiveModronFormation(), formationToSwapTo))
             g_BrivGemFarm.IsInModronFormation := False
     }
 

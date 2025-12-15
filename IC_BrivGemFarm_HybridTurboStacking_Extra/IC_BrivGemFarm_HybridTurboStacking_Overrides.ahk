@@ -251,6 +251,19 @@ class IC_BrivGemFarm_HybridTurboStacking_Added_Class ; Added to IC_BrivGemFarm_C
         {
             remainder := targetStacks - stacks
             SBStacksFarmed := 0
+            stackFormation := g_SF.Memory.GetFormationByFavorite(2)
+            defaultLevelingFormation := g_SF.Memory.GetFormationByFavorite(1)
+            levelingFormation := {}
+            ; add leveling keys not in stack formation - to level formation champs without leveling stacking team.
+            for k,v in defaultLevelingFormation
+            {
+                foundKey := false
+                for key,value in stackFormation
+                    if (v == value)
+                        foundKey := True
+                if (!foundKey)
+                    levelingFormation[k] := v
+            }
             while (SBStacksFarmed < remainder AND ElapsedTime < maxOnlineStackTime )
             {
                 if (g_SF.Memory.ReadCurrentZone() < 1)
@@ -262,6 +275,7 @@ class IC_BrivGemFarm_HybridTurboStacking_Added_Class ; Added to IC_BrivGemFarm_C
                     targetLevel := this.BGFLU_GetTargetLevel(MelfID)
                 this.BGFLU_LevelUpChamp(MelfID, targetLevel, true) ; special redundant level melf x25
                 this.BGFLU_DoPartySetupMax(stackFormation)
+                this.BGFLU_DoPartySetupMax(levelingFormation)
                 this.BGFLU_LevelUpChamp(ActiveEffectKeySharedFunctions.Briv.HeroID, amountToLevelBriv)
                 if (levelBrivSomeMore)
                     this.BGFLU_LevelUpChamp(ActiveEffectKeySharedFunctions.Briv.HeroID, amountToLevelBriv)
@@ -271,7 +285,7 @@ class IC_BrivGemFarm_HybridTurboStacking_Added_Class ; Added to IC_BrivGemFarm_C
                     usedWardenUlt := this.BGFHTS_TestWardenUltConditions(wardenThreshold)
                 if (IC_BrivGemFarm_Class.BrivFunctions.HasSwappedFavoritesThisRun AND g_SF.Memory.ReadMostRecentFormationFavorite() != 2) ; not in formation 2 still
                     this.StackFarmSetup()
-                else if (!this.IsCurrentFormationLazy(this.Memory.GetFormationByFavorite(2), 2))
+                else if (!this.IsCurrentFormationLazy(this.Memory.GetFormationByFavorite(2)))
                     this.StackFarmSetup()                
                 else if (SBStacksFarmed < (remainder / 10) and ElapsedTime > 10000 ) ; not gaining stacks 
                     this.StackFarmSetup()
@@ -300,7 +314,7 @@ class IC_BrivGemFarm_HybridTurboStacking_Added_Class ; Added to IC_BrivGemFarm_C
                     usedWardenUlt := this.BGFHTS_TestWardenUltConditions(wardenThreshold)
                 if (IC_BrivGemFarm_Class.BrivFunctions.HasSwappedFavoritesThisRun AND g_SF.Memory.ReadMostRecentFormationFavorite() != 2) ; not in formation 2 still
                     this.StackFarmSetup()
-                else if (!this.IsCurrentFormationLazy(this.Memory.GetFormationByFavorite(2), 2))
+                else if (!this.IsCurrentFormationLazy(this.Memory.GetFormationByFavorite(2)))
                     this.StackFarmSetup()
                 Sleep, 30
                 ElapsedTime := A_TickCount - StartTime

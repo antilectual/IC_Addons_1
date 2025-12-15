@@ -132,7 +132,7 @@ class IC_BrivGemFarm_LevelUp_Class extends IC_BrivGemFarm_Class
         if(setUIString)
             g_SharedData.LoopString := "Setting stack farm formation."
         stackFormation := g_SF.Memory.GetFormationByFavorite(2)
-        if(g_SF.IsCurrentFormationLazy(g_SF.Memory.GetFormationByFavorite(2), 2))
+        if(g_SF.IsCurrentFormationLazy(g_SF.Memory.GetFormationByFavorite(2)))
             isFormation2 := True
         timeoutTimer := new SH_SharedTimers()
         while (!isFormation2 AND !timeoutTimer.IsTimeUp(timeout) )
@@ -147,7 +147,7 @@ class IC_BrivGemFarm_LevelUp_Class extends IC_BrivGemFarm_Class
             }
             else
                 this.BGFLU_DoPartySetupMax(stackFormation)
-            if(g_SF.IsCurrentFormationLazy(stackFormation, 2))
+            if(g_SF.IsCurrentFormationLazy(stackFormation))
                 isFormation2 := True
             counter++
         }
