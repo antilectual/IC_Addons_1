@@ -29,7 +29,7 @@ class IC_BrivGemFarm_BrivFeatSwap_SharedFunctions_Class extends IC_SharedFunctio
     ; a method to swap formations and cancel briv's jump animation.
     SetFormation(settings := "", forceCheck := False)
     {
-        g_SharedData.LoopString := "Setting Formation"
+        ; g_SharedData.LoopString := "Setting Formation"
         if (!g_BrivUserSettingsFromAddons[ "BGFBFS_Enabled" ])
             return base.SetFormation(settings)
         if(settings != "")
