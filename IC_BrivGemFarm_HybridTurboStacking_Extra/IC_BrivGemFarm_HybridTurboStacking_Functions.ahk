@@ -10,6 +10,7 @@ class IC_BrivGemFarm_HybridTurboStacking_Functions
     static TATYANA_ID := 97
     static BrivJumpSlot := 4
     static SettingsPath := A_LineFile . "\..\BrivGemFarm_HybridTurboStacking_Settings.json"
+    static CurrentResetSettingsPath := A_LineFile . "\..\BrivGemFarm_HybridTurboStacking_CurrentReset_Settings.json"
 
     ; Adds IC_BrivGemFarm_HybridTurboStacking_Addon.ahk to the startup of the Briv Gem Farm script.
     InjectAddon()
