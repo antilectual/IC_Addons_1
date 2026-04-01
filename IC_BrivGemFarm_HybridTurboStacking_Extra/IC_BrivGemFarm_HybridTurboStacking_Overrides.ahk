@@ -105,6 +105,7 @@ class IC_BrivGemFarm_HybridTurboStacking_Class extends IC_BrivGemFarm_Class
         stacks := g_SF.Memory.ReadSBStacks()
         g_SharedData.LoopString := "FORT Restart"
         g_SF.CurrentZone := g_SF.Memory.ReadCurrentZone() ; record current zone before saving for bad progression checks
+        g_SF.ToggleAutoProgress(0)
         g_PreviousZoneStartTime := A_TickCount ; reset zone start time after stacking
         if(g_SharedData.TotalRunsCount > 0)
             g_SF.CloseIC( "FORT Restart" )
