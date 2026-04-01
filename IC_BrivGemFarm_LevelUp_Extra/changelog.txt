@@ -1,3 +1,7 @@
+April 1, 2026
+    - Allowing `Delay (ms)` to be set to 0.
+	- Fixed memory read for Ctrl / Shift so it's far more reliable.
+
 November 9, 2025
     - Fixed typos and code cosmetic updates.
     - Possible fix for champs with min/max 0/x occasionally not leveling.

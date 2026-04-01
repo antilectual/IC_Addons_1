@@ -1,3 +1,8 @@
+April 1, 2026
+    - Fixing a Bad-Autoprogression bug.
+	- Adding support for Farideh's ultimate.
+	- Decoupled `CurrentReset` setting from ordinary settings to prevent an issue where settings can easily get corrupted.
+
 November 6, 2025
     - Fixed Briv not leveling to max when below zone 1100.
     - Fixes for infinite loop FORT stacking or recursion errors with a certain setting (offline melf stack setting now effectively disabled.)
