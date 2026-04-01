@@ -3,6 +3,7 @@
 ; Functions that are used by this Addon.
 class IC_BrivGemFarm_HybridTurboStacking_Functions
 {
+    static FARIDEH_ID := 33
     static WARDEN_ID := 36
     static BRIV_ID := 58
     static MELF_ID := 59

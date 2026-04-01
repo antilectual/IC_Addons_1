@@ -59,6 +59,7 @@ Class IC_BrivGemFarm_HybridTurboStacking_Component
         settings.Enabled := false
         settings.CompleteOnlineStackZone := true
         settings.WardenUltThreshold := 50
+        settings.FaridehUltThreshold := 50
         settings.BrivAutoHeal := 50
         settings.Multirun := false
         settings.MultirunTargetStacks := g_BrivUserSettings[ "TargetStacks" ]
