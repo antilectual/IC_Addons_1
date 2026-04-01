@@ -461,18 +461,22 @@ class IC_BrivGemFarm_LevelUp_Added_Class ; Added to IC_BrivGemFarm_Class
     {
         g_SF.DirectedInput(shiftKeyDown, !shiftKeyDown, "{Shift}")
         timeoutTimer := new SH_SharedTimers()
-        while (g_SF.Memory.GameManager.game.gameInstances[g_SF.Memory.GameInstance].Screen.uiController.bottomBar.heroPanel.activeBoxes[0].levelUpInfoHandler.OverrideLevelUpAmount.Read()!=shiftKeyDown AND !timeoutTimer.IsTimeUp(100)) ;Allow 100ms for the keypress to apply at maximum to avoid getting stuck. On a fast PC it only took AHK tick (15ms) extra when needed
+        while (this.ClickDamageLevelAmount() == 10 AND !timeoutTimer.IsTimeUp(100)) ;Allow 100ms for the keypress to apply at maximum to avoid getting stuck. On a fast PC it only took AHK tick (15ms) extra when needed
             Sleep 1
     }
-    
+
     ToggleControl(controlKeyDown := false)
     {
         g_SF.DirectedInput(controlKeyDown, !controlKeyDown, "{RCtrl}")
         timeoutTimer := new SH_SharedTimers()
-        while (g_SF.Memory.GameManager.game.gameInstances[g_SF.Memory.GameInstance].Screen.uiController.bottomBar.heroPanel.activeBoxes[0].levelUpInfoHandler.OverrideLevelUpAmount.Read()!=controlKeyDown AND !timeoutTimer.IsTimeUp(100)) ;Allow 100ms for the keypress to apply at maximum to avoid getting stuck. On a fast PC it only took AHK tick (15ms) extra when needed
+        while (this.ClickDamageLevelAmount() == 25 AND !timeoutTimer.IsTimeUp(100)) ;Allow 100ms for the keypress to apply at maximum to avoid getting stuck. On a fast PC it only took AHK tick (15ms) extra when needed
             Sleep 1
     }
-    
+
+    ClickDamageLevelAmount() ;This is the base amount set per levelling seletion, e.g. always 1/10/25/100
+    {
+        return this.GameManager.game.gameInstances[0].Screen.uiController.bottomBar.heroPanel.clickDamageBox.levelUpAmount.Read()
+    }
     
     /*  BGFLU_DoPartySetupFailedConversion - Level up all champs to soft cap after a failed conversion.
         If the setting LevelToSoftCapFailedConversionBriv is set to true, also level Briv.
