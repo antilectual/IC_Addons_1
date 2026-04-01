@@ -139,9 +139,14 @@ Class IC_BrivGemFarm_LevelUp_GUI_Events
             GuiControl, ICScriptHub:Text, %A_GuiControl%, % beforeSubmit
             return
         }
-        else if (value < 1 && setting != "MinLevelTimeout" && setting != "ClickDamageMatchArea")
+        local currMin := ""
+        if (setting == "MinLevelInputDelay")
+            currMin := 0
+        else if (setting != "MinLevelTimeout" && setting != "ClickDamageMatchArea")
+            currMin := 1
+        if (currMin != "" && value < currMin)
         {
-            value := 1
+            value := currMin
             GuiControl, ICScriptHub:Text, %A_GuiControl%, % value
         }
         g_BrivGemFarm_LevelUp.TempSettings.AddSetting(setting, value)
