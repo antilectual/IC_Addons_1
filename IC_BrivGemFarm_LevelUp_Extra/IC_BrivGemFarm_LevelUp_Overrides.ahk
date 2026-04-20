@@ -475,7 +475,7 @@ class IC_BrivGemFarm_LevelUp_Added_Class ; Added to IC_BrivGemFarm_Class
 
     ClickDamageLevelAmount() ;This is the base amount set per levelling seletion, e.g. always 1/10/25/100
     {
-        return this.GameManager.game.gameInstances[0].Screen.uiController.bottomBar.heroPanel.clickDamageBox.levelUpAmount.Read()
+        return g_SF.Memory.GameManager.game.gameInstances[g_SF.Memory.GameInstance].Screen.uiController.bottomBar.heroPanel.clickDamageBox.levelUpAmount.Read()
     }
     
     /*  BGFLU_DoPartySetupFailedConversion - Level up all champs to soft cap after a failed conversion.
