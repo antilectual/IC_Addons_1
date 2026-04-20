@@ -241,7 +241,6 @@ class IC_BrivGemFarm_HybridTurboStacking_Added_Class ; Added to IC_BrivGemFarm_C
             amountToLevelBriv := this.BGFLU_GetTargetLevel(ActiveEffectKeySharedFunctions.Briv.HeroID, minOrMax := "Max")
         return amountToLevelBriv
     }
-}
 
     StackNormalStacking(targetStacks, stacks, maxOnlineStackTime)
     {
