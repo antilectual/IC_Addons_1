@@ -47,7 +47,10 @@ Class IC_BrivGemFarm_HybridTurboStacking_Component
         }
         if (needSave)
             this.SaveSettings()
-        this.CurrentReset := settings.CurrentReset
+        currResetSettings := g_SF.LoadObjectFromJSON(IC_BrivGemFarm_HybridTurboStacking_Functions.CurrentResetSettingsPath)
+        if (!IsObject(currResetSettings))
+            currResetSettings := {"currentReset":1}
+        this.CurrentReset := currResetSettings.currentReset != "" ? currResetSettings.currentReset : 1
         ; Set the state of GUI buttons with saved settings.
         g_HybridTurboStackingGui.UpdateGUISettings(settings)
     }
@@ -59,6 +62,7 @@ Class IC_BrivGemFarm_HybridTurboStacking_Component
         settings.Enabled := false
         settings.CompleteOnlineStackZone := true
         settings.WardenUltThreshold := 50
+        settings.FaridehUltThreshold := 50
         settings.BrivAutoHeal := 50
         settings.Multirun := false
         settings.MultirunTargetStacks := g_BrivUserSettings[ "TargetStacks" ]
@@ -103,9 +107,8 @@ Class IC_BrivGemFarm_HybridTurboStacking_Component
 
     SaveGUISettings()
     {
-        settings := this.Settings
-        settings.CurrentReset := this.CurrentReset
-        g_SF.WriteObjectToJSON(IC_BrivGemFarm_HybridTurboStacking_Functions.SettingsPath, settings)
+        currResetSettings := {"currentReset":this.CurrentReset}
+        g_SF.WriteObjectToJSON(IC_BrivGemFarm_HybridTurboStacking_Functions.CurrentResetSettingsPath, currResetSettings)
     }
 
     Start()

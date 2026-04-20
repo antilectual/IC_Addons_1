@@ -6,6 +6,7 @@
 ; Overrides IC_BrivGemFarm_Class.StackNormal()
 class IC_BrivGemFarm_HybridTurboStacking_Class extends IC_BrivGemFarm_Class
 {
+    static FARIDEH_ID := 33
     static WARDEN_ID := 36
     static MELF_ID := 59
    BGFHTS_DelayedOffline := false
@@ -105,6 +106,7 @@ class IC_BrivGemFarm_HybridTurboStacking_Class extends IC_BrivGemFarm_Class
         stacks := g_SF.Memory.ReadSBStacks()
         g_SharedData.LoopString := "FORT Restart"
         g_SF.CurrentZone := g_SF.Memory.ReadCurrentZone() ; record current zone before saving for bad progression checks
+        g_SF.ToggleAutoProgress(0)
         g_PreviousZoneStartTime := A_TickCount ; reset zone start time after stacking
         if(g_SharedData.TotalRunsCount > 0)
             g_SF.CloseIC( "FORT Restart" )
@@ -248,9 +250,11 @@ class IC_BrivGemFarm_HybridTurboStacking_Added_Class ; Added to IC_BrivGemFarm_C
         levelBrivSomeMore := amountToLevelBriv > 340
         SBStacksStart := g_SF.Memory.ReadSBStacks()
         usedWardenUlt := false
+        usedFaridehUlt := false
         StartTime := A_TickCount
         ElapsedTime := 0
         MelfID := 59
+        FaridehId := 33
         if (!IC_BrivGemFarm_Class.BrivFunctions.PredictStacksActive())  ; Haste stacks are taken into account
         {
             remainder := targetStacks - stacks
@@ -276,8 +280,16 @@ class IC_BrivGemFarm_HybridTurboStacking_Added_Class ; Added to IC_BrivGemFarm_C
                 g_SF.FallBackFromBossZone()
                 isMelfInParty := MelfID == g_SF.Memory.ReadSelectedChampIDBySeat(g_SF.Memory.ReadChampSeatByID(MelfID))
                 if (isMelfInParty)
+                {
                     targetLevel := this.BGFLU_GetTargetLevel(MelfID)
-                this.BGFLU_LevelUpChamp(MelfID, targetLevel, true) ; special redundant level melf x25
+                    this.BGFLU_LevelUpChamp(MelfID, targetLevel, true) ; special redundant level melf x25
+                }
+                isFaridehInParty := FaridehId == g_SF.Memory.ReadSelectedChampIDBySeat(g_SF.Memory.ReadChampSeatByID(FaridehId))
+                if (isFaridehInParty)
+                {
+                    targetLevel := this.BGFLU_GetTargetLevel(FaridehId)
+                    this.BGFLU_LevelUpChamp(FaridehId, targetLevel, true) ; special redundant level Farideh x25
+                }
                 this.BGFLU_DoPartySetupMax(stackFormation)
                 this.BGFLU_DoPartySetupMax(levelingFormation)
                 this.BGFLU_LevelUpChamp(ActiveEffectKeySharedFunctions.Briv.HeroID, amountToLevelBriv)
@@ -287,6 +299,10 @@ class IC_BrivGemFarm_HybridTurboStacking_Added_Class ; Added to IC_BrivGemFarm_C
                 wardenThreshold := g_BrivUserSettingsFromAddons[ "BGFHTS_WardenUltThreshold" ]
                 if (!usedWardenUlt && wardenThreshold > 0)
                     usedWardenUlt := this.BGFHTS_TestWardenUltConditions(wardenThreshold)
+                ; Farideh ultimate
+                faridehThreshold := g_BrivUserSettingsFromAddons[ "BGFHTS_FaridehUltThreshold" ]
+                if (!usedFaridehUlt && faridehThreshold > 0)
+                    usedFaridehUlt := this.BGFHTS_TestFaridehUltConditions(faridehThreshold)
                 if (IC_BrivGemFarm_Class.BrivFunctions.HasSwappedFavoritesThisRun AND g_SF.Memory.ReadMostRecentFormationFavorite() != 2) ; not in formation 2 still
                     this.StackFarmSetup()
                 else if (!this.IsCurrentFormationLazy(this.Memory.GetFormationByFavorite(2)))
@@ -308,14 +324,26 @@ class IC_BrivGemFarm_HybridTurboStacking_Added_Class ; Added to IC_BrivGemFarm_C
                 g_SF.FallBackFromBossZone()
                 isMelfInParty := MelfID == g_SF.Memory.ReadSelectedChampIDBySeat(g_SF.Memory.ReadChampSeatByID(MelfID))
                 if (isMelfInParty)
+                {
                     targetLevel := this.BGFLU_GetTargetLevel(MelfID)
-                this.BGFLU_LevelUpChamp(MelfID, targetLevel, true) ; level melf x25
+                    this.BGFLU_LevelUpChamp(MelfID, targetLevel, true) ; level melf x25
+                }
+                isFaridehInParty := FaridehId == g_SF.Memory.ReadSelectedChampIDBySeat(g_SF.Memory.ReadChampSeatByID(FaridehId))
+                if (isFaridehInParty)
+                {
+                    targetLevel := this.BGFLU_GetTargetLevel(FaridehId)
+                    this.BGFLU_LevelUpChamp(FaridehId, targetLevel, true) ; special redundant level Farideh x25
+                }
                 if (levelBrivSomeMore)
                     this.BGFLU_LevelUpChamp(ActiveEffectKeySharedFunctions.Briv.HeroID, amountToLevelBriv)
                 ; Warden ultimate
                 wardenThreshold := g_BrivUserSettingsFromAddons[ "BGFHTS_WardenUltThreshold" ]
                 if (!usedWardenUlt && wardenThreshold > 0)
                     usedWardenUlt := this.BGFHTS_TestWardenUltConditions(wardenThreshold)
+                ; Farideh ultimate
+                faridehThreshold := g_BrivUserSettingsFromAddons[ "BGFHTS_FaridehUltThreshold" ]
+                if (!usedFaridehUlt && faridehThreshold > 0)
+                    usedFaridehUlt := this.BGFHTS_TestFaridehUltConditions(faridehThreshold)
                 if (IC_BrivGemFarm_Class.BrivFunctions.HasSwappedFavoritesThisRun AND g_SF.Memory.ReadMostRecentFormationFavorite() != 2) ; not in formation 2 still
                     this.StackFarmSetup()
                 else if (!this.IsCurrentFormationLazy(this.Memory.GetFormationByFavorite(2)))
@@ -359,6 +387,15 @@ class IC_BrivGemFarm_HybridTurboStacking_Added_Class ; Added to IC_BrivGemFarm_C
         return false
     }
 
+    BGFHTS_TestFaridehUltConditions(threshold := 0)
+    {
+        champID := IC_BrivGemFarm_HybridTurboStacking_Class.FARIDEH_ID
+        champInWFormation := g_SF.IsChampInFormation(champID, g_SF.Memory.GetFormationByFavorite(2))
+        if (champInWFormation && this.BGFHTS_CheckMaxEnemies(threshold))
+            return this.BGFHTS_UseFaridehUlt()
+        return false
+    }
+
     BGFHTS_CheckMaxEnemies(threshold := 0)
     {
         if (threshold == 0 || threshold == "")
@@ -371,6 +408,13 @@ class IC_BrivGemFarm_HybridTurboStacking_Added_Class ; Added to IC_BrivGemFarm_C
     BGFHTS_UseWardenUlt()
     {
         champID := IC_BrivGemFarm_HybridTurboStacking_Class.WARDEN_ID
+        g_SF.DirectedInput(,, "{" . g_SF.GetUltimateButtonByChampID(champID) . "}")
+        return true
+    }
+
+    BGFHTS_UseFaridehUlt()
+    {
+        champID := IC_BrivGemFarm_HybridTurboStacking_Class.FARIDEH_ID
         g_SF.DirectedInput(,, "{" . g_SF.GetUltimateButtonByChampID(champID) . "}")
         return true
     }
@@ -474,6 +518,7 @@ class IC_BrivGemFarm_HybridTurboStacking_IC_SharedData_Added_Class ;Added to IC_
         g_BrivUserSettingsFromAddons[ "BGFHTS_Enabled" ] := settings.Enabled
         g_BrivUserSettingsFromAddons[ "BGFHTS_CompleteOnlineStackZone" ] := settings.CompleteOnlineStackZone
         g_BrivUserSettingsFromAddons[ "BGFHTS_WardenUltThreshold" ] := settings.WardenUltThreshold
+        g_BrivUserSettingsFromAddons[ "BGFHTS_FaridehUltThreshold" ] := settings.FaridehUltThreshold
         g_BrivUserSettingsFromAddons[ "BGFHTS_BrivAutoHeal" ] := settings.BrivAutoHeal
         g_BrivUserSettingsFromAddons[ "BGFHTS_Multirun" ] := settings.Multirun
         g_BrivUserSettingsFromAddons[ "BGFHTS_MultirunTargetStacks" ] := settings.MultirunTargetStacks

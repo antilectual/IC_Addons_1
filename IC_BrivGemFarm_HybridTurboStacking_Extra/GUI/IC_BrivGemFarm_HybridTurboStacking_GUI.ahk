@@ -71,6 +71,13 @@ BGFHTS_WardenUlt()
         g_HybridTurboStacking.UpdateSetting("WardenUltThreshold", value)
 }
 
+BGFHTS_FaridehUlt()
+{
+    global
+    if ((value := BGFHTS_ValidateInput(0, 100)) != "RETURN")
+        g_HybridTurboStacking.UpdateSetting("FaridehUltThreshold", value)
+}
+
 BGFHTS_BrivAutoHeal()
 {
     global
@@ -235,6 +242,12 @@ Class IC_BrivGemFarm_HybridTurboStacking_GUI
         GUIFunctions.UseThemeTextColor()
         text := "Use Warden's ultimate when enemy count has reached this value (0 disables)"
         Gui, ICScriptHub:Add, Text, x+5 h%ctrlH% 0x200 vBGFHTS_WardenUltText, % text
+        ; Farideh ult
+        GUIFunctions.UseThemeTextColor("InputBoxTextColor")
+        Gui, ICScriptHub:Add, Edit, w40 xs y+%ySpacingSmall% Limit4 vBGFHTS_FaridehUlt gBGFHTS_FaridehUlt
+        GUIFunctions.UseThemeTextColor()
+        text := "Use Farideh's ultimate when enemy count has reached this value (0 disables)"
+        Gui, ICScriptHub:Add, Text, x+5 h%ctrlH% 0x200 vBGFHTS_FaridehUltText, % text
         ; Briv auto-heal
         GUIFunctions.UseThemeTextColor("InputBoxTextColor")
         Gui, ICScriptHub:Add, Edit, w40 xs y+%ySpacingSmall% Limit4 vBGFHTS_BrivAutoHeal gBGFHTS_BrivAutoHeal
@@ -470,6 +483,7 @@ Class IC_BrivGemFarm_HybridTurboStacking_GUI
         GuiControl, ICScriptHub:, BGFHTS_Enabled, % data.Enabled
         GuiControl, ICScriptHub:, BGFHTS_CompleteZone, % data.CompleteOnlineStackZone
         GuiControl, ICScriptHub:, BGFHTS_WardenUlt, % data.WardenUltThreshold
+        GuiControl, ICScriptHub:, BGFHTS_FaridehUlt, % data.FaridehUltThreshold
         GuiControl, ICScriptHub:, BGFHTS_BrivAutoHeal, % data.BrivAutoHeal
         GuiControl, ICScriptHub:, BGFHTS_Multirun, % data.Multirun
         GuiControl, ICScriptHub:, BGFHTS_MultirunTargetStacks, % data.MultirunTargetStacks
