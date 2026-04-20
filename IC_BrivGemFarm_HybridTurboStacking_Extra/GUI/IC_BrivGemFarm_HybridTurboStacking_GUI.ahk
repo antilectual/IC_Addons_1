@@ -158,6 +158,31 @@ BGFHTS_Mod50CheckBoxes()
 {
 }
 
+BGFHTS_BrivLevelingThresholds()
+{
+    global
+    thresholds := []
+    GuiControlGet, count,, BGFHTS_BrivLevelingCount
+    Loop, % count
+    {
+        GuiControlGet, zone,, BGFHTS_BrivLevelingZone%A_Index%
+        GuiControlGet, level,, BGFHTS_BrivLevelingLevel%A_Index%
+        if (zone != "" AND level != "")
+            thresholds.Push({"zone": zone, "level": level})
+    }
+    g_HybridTurboStacking.UpdateSetting("BrivLevelingThresholds", thresholds)
+}
+
+BGFHTS_BrivLevelingCount()
+{
+    global
+    if ((value := BGFHTS_ValidateInput(1, 15)) != "RETURN")
+    {
+        g_HybridTurboStacking.UpdateSetting("BrivLevelingThresholdsCount", value)
+        g_HybridTurboStackingGui.UpdateBrivLevelingRows(value)
+    }
+}
+
 ; Melf forecast resize events
 OnMessage(0x0231, Func("BGFHTS_CheckResizeEvent").Bind(0x0231)) ; WM_ENTERSIZEMOVE
 OnMessage(0x0232, Func("BGFHTS_CheckResizeEvent").Bind(0x0232)) ; WM_EXITSIZEMOVE
@@ -199,6 +224,7 @@ Class IC_BrivGemFarm_HybridTurboStacking_GUI
         local ySpacingSmall := 5
         local ctrlH:= 21
         local text := ""
+        local newW := 440
         Gui, ICScriptHub:Add, Button, xs y+%yTitleSpacing% vBGFHTS_Save gBGFHTS_Save, Save
         Gui, ICScriptHub:Add, CheckBox, x+18 yp+5 vBGFHTS_Enabled gBGFHTS_Enabled, Enabled
         text := "Complete the stacking zone before online stacking"
@@ -222,7 +248,7 @@ Class IC_BrivGemFarm_HybridTurboStacking_GUI
         Gui, ICScriptHub:Add, Text, x+%xSpacing% vBGFHTS_HealsText, Times healed:
         Gui, ICScriptHub:Add, Text, x+5 w30 vBGFHTS_Heals
         ; Stack settings
-        Gui, ICScriptHub:Add, Groupbox, Section xs y+%ySpacing% vBGFHTS_StacksGroup, Stacks
+        Gui, ICScriptHub:Add, Groupbox, Section xs y+%ySpacing% w%newW% vBGFHTS_StacksGroup, Stacks
         ; Warning
         GUIFunctions.UseThemeTextColor("WarningTextColor", 700)
         text := "The settings below require both Auto Detect and IgnoreBrivHaste off."
@@ -245,21 +271,18 @@ Class IC_BrivGemFarm_HybridTurboStacking_GUI
         Gui, ICScriptHub:Add, CheckBox, x+15 yp+4 vBGFHTS_MultirunDelayOffline gBGFHTS_MultirunDelayOffline
         GuiControlGet, pos, ICScriptHub:Pos, BGFHTS_MultirunDelayOffline
         ; When disabled, the checkbox overlaps the text.
-        newW := posW - 10
-        GuiControl, ICScriptHub:MoveDraw, BGFHTS_MultirunDelayOffline, w%newW%
+        posW := 440 - posX - xSection
+        GuiControl, ICScriptHub:MoveDraw, BGFHTS_MultirunDelayOffline, w%posW%
         textPos := posX + 19
         Gui, ICScriptHub:Add, Text, x%textPos% yp-4 h%ctrlH% 0x200 vBGFHTS_MultirunDelayOfflineText, Delay offline until last run
         ; Resize Stacks groupbox
         GuiControlGet, pos, ICScriptHub:Pos, BGFHTS_MultirunDelayOfflineText
-        maxX := posX + posW + xSection - 5
-        GuiControlGet, pos, ICScriptHub:Pos, BGFHTS_MultirunDelayOfflineText
         maxY := posY + posH + ySpacing
         GuiControlGet, pos, ICScriptHub:Pos, BGFHTS_StacksGroup
-        newW := maxX - posX
         newH := maxY - posY
-        GuiControl, ICScriptHub:MoveDraw, BGFHTS_StacksGroup, w%newW% h%newH%
+        GuiControl, ICScriptHub:MoveDraw, BGFHTS_StacksGroup, h%newH%
         ; Melf settings
-        Gui, ICScriptHub:Add, Groupbox, Section xs y+%ySpacing% vBGFHTS_MelfGroup, Melf
+        Gui, ICScriptHub:Add, Groupbox, Section xs y+%ySpacing% w%newW% vBGFHTS_MelfGroup, Melf
         text := "Delay stacking until Melf's" . " ""% " . "chance to spawn additional enemies"" effect is active"
         Gui, ICScriptHub:Add, CheckBox, xs+%xSection% ys+%yTitleSpacing% vBGFHTS_100Melf gBGFHTS_100Melf, % text
         ; Min/max online stack zones
@@ -276,7 +299,7 @@ Class IC_BrivGemFarm_HybridTurboStacking_GUI
         Gui, ICScriptHub:Add, DropDownList, x+7 yp-3 AltSubmit w165 vBGFHTS_MelfActive gBGFHTS_MelfActive
         choices := "Stack online with Melf||Stack online with Melf + Tatyana/Warden"
         GuiControl, ICScriptHub:, BGFHTS_MelfActive, % "|" . choices
-        newWidth := this.DropDownSize(choices,,, 8)
+        newWidth := GUIFunctions.DropDownSize(choices,,, 8)
         GuiControlGet, hnwd, ICScriptHub:Hwnd, BGFHTS_MelfActive
         SendMessage, 0x0160, newWidth, 0,, ahk_id %hnwd% ; CB_SETDROPPEDWIDTH
         ; Info
@@ -294,7 +317,7 @@ Class IC_BrivGemFarm_HybridTurboStacking_GUI
         Gui, ICScriptHub:Add, DropDownList, x+7 yp-3 AltSubmit w165 vBGFHTS_MelfInactive gBGFHTS_MelfInactive
         choices := "Stack online with Tatyana||Stack offline"
         GuiControl, ICScriptHub:, BGFHTS_MelfInactive, % "|" . choices
-        newWidth := this.DropDownSize(choices,,, 8)
+        newWidth := GUIFunctions.DropDownSize(choices,,, 8)
         ; Position
         GuiControlGet, pos, ICScriptHub:Pos, BGFHTS_MelfInactive
         controlID := "BGFHTS_MelfActive"
@@ -330,14 +353,31 @@ Class IC_BrivGemFarm_HybridTurboStacking_GUI
         GuiControlGet, pos, ICScriptHub:Pos, BGFHTS_BrivStackZonesText
         this.BuildModTable(posX, posY)
         ; Resize Melf groupbox
-        GuiControlGet, pos, ICScriptHub:Pos, BGFHTS_100Melf
-        maxX := posX + posW + xSection - 5
         GuiControlGet, pos, ICScriptHub:Pos, BGFHTS_BrivStack_Mod_50_50
         maxY := posY + posH + ySpacing
         GuiControlGet, pos, ICScriptHub:Pos, BGFHTS_MelfGroup
-        newW := maxX - posX
         newH := maxY - posY
-        GuiControl, ICScriptHub:MoveDraw, BGFHTS_MelfGroup, w%newW% h%newH%
+        GuiControl, ICScriptHub:MoveDraw, BGFHTS_MelfGroup, h%newH%
+        ; Briv Leveling by Zone
+        levelingY := posY + newH + ySpacing
+        Gui, ICScriptHub:Add, Groupbox, Section xs y%levelingY% w%newW% vBGFHTS_BrivLevelingGroup, Briv Leveling by Zone
+        GUIFunctions.UseThemeTextColor("InputBoxTextColor")
+        Gui, ICScriptHub:Add, Edit, w40 xs+%xSection% ys+20 Limit2 vBGFHTS_BrivLevelingCount gBGFHTS_BrivLevelingCount
+        GUIFunctions.UseThemeTextColor()
+        Gui, ICScriptHub:Add, Text, x+5 h%ctrlH% 0x200 vBGFHTS_BrivLevelingCountText, Number of leveling zones (up to 15)
+        Loop, 15
+        {
+            GUIFunctions.UseThemeTextColor("InputBoxTextColor")
+            Gui, ICScriptHub:Add, Edit, w40 Hidden vBGFHTS_BrivLevelingZone%A_Index% gBGFHTS_BrivLevelingThresholds
+            GUIFunctions.UseThemeTextColor()
+            Gui, ICScriptHub:Add, Text, h%ctrlH% 0x200 Hidden vBGFHTS_BrivLevelingZoneText%A_Index%, Zone
+            GUIFunctions.UseThemeTextColor("InputBoxTextColor")
+            Gui, ICScriptHub:Add, Edit, w40 Hidden vBGFHTS_BrivLevelingLevel%A_Index% gBGFHTS_BrivLevelingThresholds
+            GUIFunctions.UseThemeTextColor()
+            Gui, ICScriptHub:Add, Text, h%ctrlH% 0x200 Hidden vBGFHTS_BrivLevelingLevelText%A_Index%, Lvl
+        }
+        ; Initial layout
+        this.UpdateBrivLevelingRows(5)
     }
 
     InitForecast()
@@ -441,6 +481,86 @@ Class IC_BrivGemFarm_HybridTurboStacking_GUI
         GuiControl, ICScriptHub:Choose, BGFHTS_MelfInactive, % data.MelfInactiveStrategy
         this.ToggleMultirun(data.Multirun)
         this.LoadMod50(data.PreferredBrivStackZones)
+        this.LoadBrivLevelingThresholds(data.BrivLevelingThresholds, data.BrivLevelingThresholdsCount)
+    }
+
+    LoadBrivLevelingThresholds(thresholds, count)
+    {
+        GuiControl, ICScriptHub:, BGFHTS_BrivLevelingCount, % count
+        Loop, 15
+        {
+            zone := thresholds[A_Index].zone
+            level := thresholds[A_Index].level
+            GuiControl, ICScriptHub:, BGFHTS_BrivLevelingZone%A_Index%, % zone
+            GuiControl, ICScriptHub:, BGFHTS_BrivLevelingLevel%A_Index%, % level
+        }
+        this.UpdateBrivLevelingRows(count)
+    }
+
+    UpdateBrivLevelingRows(count)
+    {
+        GuiControlGet, b, ICScriptHub:Pos, BGFHTS_BrivLevelingGroup
+        if (!bW)
+            return
+        
+        count := count == "" ? 0 : count
+        countX := bX + 10
+        countY := bY + 18
+        
+        ; Bug when using Move in a Tab control
+        GuiControl, ICScriptHub:MoveDraw, BGFHTS_BrivLevelingCount, x%countX% y%countY%
+        GuiControlGet, bug, ICScriptHub:Pos, BGFHTS_BrivLevelingCount
+        offX := bugX - countX
+        offY := bugY - countY
+        
+        countX -= offX
+        countY -= offY
+        
+        GuiControl, ICScriptHub:MoveDraw, BGFHTS_BrivLevelingCount, x%countX% y%countY%
+        GuiControl, ICScriptHub:MoveDraw, BGFHTS_BrivLevelingCountText, % "x" (countX + 45) " y" countY
+
+        gridStartY := countY + 28
+        maxY := gridStartY
+
+        Loop, 15
+        {
+            if (A_Index <= count)
+            {
+                row := Ceil(A_Index / 3)
+                col := Mod(A_Index - 1, 3)
+
+                colX := bX + 10 + (col * 142) - offX
+                rowY := gridStartY + (row - 1) * 28
+
+                GuiControl, ICScriptHub:MoveDraw, BGFHTS_BrivLevelingZone%A_Index%, x%colX% y%rowY%
+                GuiControl, ICScriptHub:MoveDraw, BGFHTS_BrivLevelingZoneText%A_Index%, % "x" (colX + 42) " y" rowY
+                GuiControl, ICScriptHub:MoveDraw, BGFHTS_BrivLevelingLevel%A_Index%, % "x" (colX + 75) " y" rowY
+                GuiControl, ICScriptHub:MoveDraw, BGFHTS_BrivLevelingLevelText%A_Index%, % "x" (colX + 117) " y" rowY                
+                GuiControl, ICScriptHub:Show, BGFHTS_BrivLevelingZone%A_Index%
+                GuiControl, ICScriptHub:Show, BGFHTS_BrivLevelingZoneText%A_Index%
+                GuiControl, ICScriptHub:Show, BGFHTS_BrivLevelingLevel%A_Index%
+                GuiControl, ICScriptHub:Show, BGFHTS_BrivLevelingLevelText%A_Index%
+                
+                maxY := rowY + 22
+            }
+            else
+            {
+                GuiControl, ICScriptHub:Hide, BGFHTS_BrivLevelingZone%A_Index%
+                GuiControl, ICScriptHub:Hide, BGFHTS_BrivLevelingZoneText%A_Index%
+                GuiControl, ICScriptHub:Hide, BGFHTS_BrivLevelingLevel%A_Index%
+                GuiControl, ICScriptHub:Hide, BGFHTS_BrivLevelingLevelText%A_Index%
+            }
+        }
+        
+        if (count > 0)
+            newH := maxY - (bY - offY) + 10
+        else
+            newH := countY + 28 - (bY - offY)
+            
+        GuiControl, ICScriptHub:MoveDraw, BGFHTS_BrivLevelingGroup, h%newH%
+
+        if (IsObject(g_HybridTurboStacking_PreferredEnemies))
+            g_HybridTurboStacking_PreferredEnemies.Move(bY + newH - 57)
     }
 
     ToggleMultirun(show := true)
@@ -614,21 +734,6 @@ Class IC_BrivGemFarm_HybridTurboStacking_GUI
             GuiControl, ICScriptHub:, BGFHTS_BrivStack_Mod_50_%A_Index%, % checked
         }
         Gui, ICScriptHub:Submit, NoHide
-    }
-
-    ; Returns the width of DDL accomodating the longest item in list.
-    DropDownSize(List, Font:="", FontSize:=10, Padding:=24)
-    {
-        Loop, Parse, List, |
-        {
-            if Font
-                Gui DropDownSize:Font, s%FontSize%, %Font%
-            Gui DropDownSize:Add, Text, R1, %A_LoopField%
-            GuiControlGet T, DropDownSize:Pos, Static%A_Index%
-            TW > X ? X := TW :
-        }
-        Gui DropDownSize:Destroy
-        return X + Padding
     }
 
     CheckSettingsCombo()

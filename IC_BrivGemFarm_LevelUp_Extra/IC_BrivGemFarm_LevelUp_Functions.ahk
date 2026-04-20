@@ -110,21 +110,6 @@ class IC_BrivGemFarm_LevelUp_Functions
         return nobj
     }
 
-    ; Returns the width of DDL accomodating the longest item in list
-    DropDownSize(List, Font:="", FontSize:=10, Padding:=24)
-    {
-        Loop, Parse, List, |
-        {
-            if Font
-                Gui DropDownSize:Font, s%FontSize%, %Font%
-            Gui DropDownSize:Add, Text, R1, %A_LoopField%
-            GuiControlGet T, DropDownSize:Pos, Static%A_Index%
-            TW > X ? X := TW :
-        }
-        Gui DropDownSize:Destroy
-        return X + Padding
-    }
-
     ; Returns the text with added line wraps if a line is longer than maxLength
     ; TODO: Use text width
     WrapText(text, maxLength := 60)

@@ -320,21 +320,6 @@ Class IC_BrivGemFarm_BrivFeatSwap_GUI
         Gui, ICScriptHub:Add, Checkbox, vBGFBFS_CopyPasteBGFAS_Mod_50_%loopCount% Checked x%xLoc% y%yLoc% gBGFBFS_Mod50CheckBoxes, % loopCount
     }
 
-    ; Returns the width of DDL accomodating the longest item in list.
-    DropDownSize(List, Font:="", FontSize:=10, Padding:=24)
-    {
-        Loop, Parse, List, |
-        {
-            if Font
-                Gui DropDownSize:Font, s%FontSize%, %Font%
-            Gui DropDownSize:Add, Text, R1, %A_LoopField%
-            GuiControlGet T, DropDownSize:Pos, Static%A_Index%
-            TW > X ? X := TW :
-        }
-        Gui DropDownSize:Destroy
-        return X + Padding
-    }
-
     ; Show tooltips on mouseover.
     AddToolTips()
     {

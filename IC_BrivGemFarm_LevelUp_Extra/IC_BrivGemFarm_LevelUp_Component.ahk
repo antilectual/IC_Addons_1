@@ -603,7 +603,7 @@ Class IC_BrivGemFarm_LevelUp_Component
         GuiControl, -Redraw, %controlID%
         GuiControl, ICScriptHub:, %controlID%, % "|" . upgrades
         if(heroData.cachedSize == "")
-            heroData.cachedSize := IC_BrivGemFarm_LevelUp_Functions.DropDownSize(upgrades)
+            heroData.cachedSize := GUIFunctions.DropDownSize(upgrades)
         GuiControlGet, hwnd, ICScriptHub:Hwnd, %controlID%
         SendMessage, CB_SETDROPPEDWIDTH, heroData.cachedSize, 0, , ahk_id %hwnd%
         if (Errorlevel < 0)
@@ -885,7 +885,7 @@ Class IC_BrivGemFarm_LevelUp_Seat
         GuiControl, ICScriptHub:, BGFLU_Combo_MinLevel_%seat%, % "|" . upgrades
         GuiControl, ICScriptHub:, BGFLU_Combo_MaxLevel_%seat%, % "|" . upgrades
         if(heroData.cachedSize == "")
-            heroData.cachedSize := IC_BrivGemFarm_LevelUp_Functions.DropDownSize(upgrades)
+            heroData.cachedSize := GUIFunctions.DropDownSize(upgrades)
         this.SetMinMaxComboWidth(heroData.cachedSize)
         Sleep, 1
         local levelSettings := g_BrivGemFarm_LevelUp.GetLevelSettings()

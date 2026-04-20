@@ -70,6 +70,8 @@ Class IC_BrivGemFarm_HybridTurboStacking_Component
         settings.MelfActiveStrategy := 1
         settings.MelfInactiveStrategy := 1
         settings.PreferredBrivStackZones := 544790277504495
+        settings.BrivLevelingThresholdsCount := 5
+        settings.BrivLevelingThresholds := [{"zone": 1100, "level": 400}, {"zone": 1200, "level": 455}, {"zone": 1300, "level": 575}, {"zone": 1400, "level": 695}, {"zone": 1500, "level": 815}]
         settings.CurrentReset := 1
         return settings
     }

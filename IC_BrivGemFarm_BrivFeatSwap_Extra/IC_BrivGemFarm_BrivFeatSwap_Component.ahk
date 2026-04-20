@@ -248,7 +248,7 @@ Class IC_BrivGemFarm_BrivFeatSwap_Component
         choices .= "|12J/11J Tall Tales|14J/9J Tall Tales|16J/15J Tall Tales"
         GuiControl, ICScriptHub:, BGFBFS_Preset, % "|" . choices
         ; Resize
-        newWidth := IC_BrivGemFarm_BrivFeatSwap_GUI.DropDownSize(choices,,, 8)
+        newWidth := GUIFunctions.DropDownSize(choices,,, 8)
         GuiControlGet, hnwd, ICScriptHub:Hwnd, BGFBFS_Preset
         SendMessage, 0x0160, newWidth, 0,, ahk_id %hnwd% ; CB_SETDROPPEDWIDTH
     }

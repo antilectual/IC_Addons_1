@@ -221,21 +221,25 @@ class IC_BrivGemFarm_HybridTurboStacking_Added_Class ; Added to IC_BrivGemFarm_C
     {
         currentZone:= g_SF.Memory.ReadCurrentZone()
         amountToLevelBriv := 0
-        if (currentZone >= 1500)
-            amountToLevelBriv := 815
-        else if (currentZone >= 1400)
-            amountToLevelBriv := 695
-        else if (currentZone >= 1300)
-            amountToLevelBriv := 575
-        else if (currentZone >= 1200)
-            amountToLevelBriv := 455
-        else if (currentZone >= 1100)
-            amountToLevelBriv := 400
-        else
-            amountToLevelBriv := this.BGFLU_GetTargetLevel(ActiveEffectKeySharedFunctions.Briv.HeroID, minOrMax := "Max") 
+        thresholds := g_BrivUserSettingsFromAddons[ "BGFHTS_BrivLevelingThresholds" ]
+        if (IsObject(thresholds))
+        {
+            ; Loop backwards from highest zone threshold
+            Loop, % thresholds.Length()
+            {
+                i := thresholds.Length() - A_Index + 1
+                if (currentZone >= thresholds[i].zone)
+                {
+                    amountToLevelBriv := thresholds[i].level
+                    break
+                }
+            }
+        }
+        if (amountToLevelBriv == 0)
+            amountToLevelBriv := this.BGFLU_GetTargetLevel(ActiveEffectKeySharedFunctions.Briv.HeroID, minOrMax := "Max")
         return amountToLevelBriv
-        
     }
+}
 
     StackNormalStacking(targetStacks, stacks, maxOnlineStackTime)
     {
@@ -481,6 +485,8 @@ class IC_BrivGemFarm_HybridTurboStacking_IC_SharedData_Added_Class ;Added to IC_
         g_BrivUserSettingsFromAddons[ "BGFHTS_MelfInactiveStrategy" ] := settings.MelfInactiveStrategy
         mod50Zones := IC_BrivGemFarm_HybridTurboStacking_Functions.GetPreferredBrivStackZones(settings.PreferredBrivStackZones)
         g_BrivUserSettingsFromAddons[ "BGFHTS_PreferredBrivStackZones" ] := mod50Zones
+        g_BrivUserSettingsFromAddons[ "BGFHTS_BrivLevelingThresholdsCount" ] := settings.BrivLevelingThresholdsCount
+        g_BrivUserSettingsFromAddons[ "BGFHTS_BrivLevelingThresholds" ] := settings.BrivLevelingThresholds
     }
 
     BGFHTS_UpdateMelfStackZoneAfterReset(forceUpdate := false)

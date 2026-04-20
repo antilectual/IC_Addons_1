@@ -204,7 +204,7 @@ Class IC_BrivGemFarm_LevelUp_GUI
         local group := new IC_BrivGemFarm_LevelUp_GUI_Group("BGFLU_GUISettingsGroup", "GUI Settings",, false)
         local definitionsGroup := new IC_BrivGemFarm_LevelUp_GUI_Group("BGFLU_DefinitionsGroup", "Definitions", "BGFLU_GUISettingsGroup")
         languages := "English||Deutsch|Pусский|Français|Português|Español|中文"
-        width := IC_BrivGemFarm_LevelUp_Functions.DropDownSize(languages)
+        width := GUIFunctions.DropDownSize(languages)
         definitionsGroup.AddControl("BGFLU_SelectLanguage", "DropDownList", "x+0 w" . width . " AltSubmit gBGFLU_SelectLanguage", languages, true)
         definitionsGroup.AddControl("BGFLU_LoadDefinitions", "Button", "Disabled h20 gBGFLU_LoadDefinitions", "Load Definitions")
         definitionsGroup.AddControl("BGFLU_LoadDefinitionsProgress", "Progress", "h20 w285 Range0-11")
