@@ -6,40 +6,9 @@
 class IC_BrivGemFarm_LevelUp_Class extends IC_BrivGemFarm_Class
 {
     Levelupx25 := {}
-    ChampIDs := {}
     ExtraChamps := {}
+    ; ChampIDs - See IC_BrivGemFarm_Class
 
-    InitChamps()
-    {
-        this.ChampIDs := {}
-        this.ChampIDs[Briv := "58"] := 58 ; must be in quotes so object is treated as dict and not an array that will modify keys.
-        this.ChampIDs[Widdle := 91] := 91
-        this.ChampIDs[Ellywick := 83] := 83
-        this.ChampIDs[HewMaan := 75] := 75
-        this.ChampIDs[Tatyana := 97] := 97
-        this.ChampIDs[Melf := 59] := 59
-        this.ChampIDs[Dynaheir := 145] := 145
-        this.ChampIDs[Diana := 148] := 148
-        this.ChampIDs[BBEG  := 125] := 125
-        this.ChampIDs[Dungeon_Master := 99] := 99
-        this.ChampIDs[Imoen := 117] := 117
-        this.ChampIDs[Laezel  := 128] := 128
-        this.ChampIDs[Deekin := 28] := 28
-        this.ChampIDs[Virgil := 115] := 115
-        this.ChampIDs[Sentry := 52] := 52
-        this.ChampIDs[Nahara := 102] := 102
-        this.ChampIDs[Dhani := 89] := 89
-        this.ChampIDs[Kent := 114] := 114
-        this.ChampIDs[Gazrick := 98] := 98
-        this.ChampIDs[Alyndra := 79] := 79
-        this.ChampIDs[Selise := 81] := 81
-        this.ChampIDs[Vi := 95] := 95
-        this.ChampIDs[Havilar := 56] := 56
-        this.ChampIDs[Shandie := 47] := 47
-        this.ChampIDs[Minsc := 7] := 7
-        this.ChampIDs[Baldric := 165] := 165 
-        this.ChampIDs[Thellora := 139] := 139
-    }
     ;=====================================================
     ;Primary Functions for Briv Gem Farm
     ;=====================================================
