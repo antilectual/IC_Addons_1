@@ -11,39 +11,12 @@ GUIFunctions.UseThemeTextColor("WarningTextColor", 700)
 Gui, ICScriptHub:Add, Text, xs ys+20 Hidden vBGFBFS_StatusWarning, WARNING: Addon was loaded too late. Stop/start Gem Farm to resume.
 GUIFunctions.UseThemeTextColor()
 
-; Validates inputs for targetQ/E and stack setup controls.
-; Returns: - int:input or str:"RETURN" if input is invalid.
-BGFBFS_ValidateInput(min := 0, max := 1)
-{
-    global
-    local beforeSubmit := % %A_GuiControl%
-    GuiControlGet, input,, %A_GuiControl%
-    if input is not digit
-    {
-        onlyDigits := RegExReplace(beforeSubmit, "[^\d]+")
-        GuiControl, ICScriptHub:Text, %A_GuiControl%, % onlyDigits
-        return "RETURN"
-    }
-    if input not between %min% and %max%
-    {
-        input := input < min ? min : max
-        GuiControl, ICScriptHub:Text, %A_GuiControl%, % input
-    }
-    if (beforeSubmit != "" && LTrim(input, 0) == beforeSubmit && (input . " ") != (beforeSubmit . " "))
-    {
-        input := LTrim(beforeSubmit, "0")
-        GuiControl, ICScriptHub:Text, %A_GuiControl%, % input
-    }
-    Gui, ICScriptHub:Submit, NoHide
-    return input
-}
-
 BrivGemFarm_BrivFeatSwap_Target()
 {
     global
     if (g_BrivFeatSwap.GetPresetName() != "")
-        BGFBFS_ValidateInput(%A_GuiControl%, %A_GuiControl%)
-    else if ((value := BGFBFS_ValidateInput(0, 999)) != "RETURN")
+        GUIFunctions.ValidateIntegerInput(%A_GuiControl%, %A_GuiControl%)
+    else if ((value := GUIFunctions.ValidateIntegerInput(0, 999)) != "RETURN")
         g_BrivFeatSwap.UpdatePath()
 }
 
@@ -67,7 +40,7 @@ BGFBFS_Preset()
 BGFBFS_Runs()
 {
     global
-    if ((value := BGFBFS_ValidateInput(1, 99)) == "RETURN")
+    if ((value := GUIFunctions.ValidateIntegerInput(1, 99)) == "RETURN")
         return
     g_BrivFeatSwap.UpdateStacksFromRunCount(value)
 }
@@ -75,14 +48,14 @@ BGFBFS_Runs()
 BGFBFS_ResetArea()
 {
     global
-    if ((value := BGFBFS_ValidateInput(1, 99999)) != "RETURN")
+    if ((value := GUIFunctions.ValidateIntegerInput(1, 99999)) != "RETURN")
         g_BrivFeatSwap.UpdatePath(value)
 }
 
 BGFBFS_BrivMetalbornArea()
 {
     global
-    if ((value := BGFBFS_ValidateInput(1, 99999)) == "RETURN")
+    if ((value := GUIFunctions.ValidateIntegerInput(1, 99999)) == "RETURN")
         return
     GuiControlGet, value, ICScriptHub:, BGFBFS_ResetArea
     g_BrivFeatSwap.UpdatePath(value)
@@ -91,7 +64,7 @@ BGFBFS_BrivMetalbornArea()
 BGFBFS_StacksRequired()
 {
     global
-    if ((value := BGFBFS_ValidateInput(0, 999999999999999)) != "RETURN")
+    if ((value := GUIFunctions.ValidateIntegerInput(0, 999999999999999)) != "RETURN")
         g_BrivFeatSwap.UpdateResetAreaFromStacks(value)
 }
 
@@ -113,7 +86,7 @@ BGFBFS_Mod50CheckBoxes()
 BGFBFS_BrivMinLevelArea()
 {
     global
-    if ((value := BGFBFS_ValidateInput(1, 99999)) != "RETURN")
+    if ((value := GUIFunctions.ValidateIntegerInput(1, 99999)) != "RETURN")
     {
         if (IsObject(g_BrivGemFarm_LevelUp))
             GuiControl, ICScriptHub:, BGFLU_BrivMinLevelArea, % value
