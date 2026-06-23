@@ -301,7 +301,7 @@ Class IC_BrivGemFarm_BrivFeatSwap_Component
             case "12J/11J Tall Tales":
                 this.ApplyPresets(554220480505760, 12, 11)
             case "14J/9J Tall Tales":
-                this.ApplyPresets(1125899805626349, 14, 9)
+                this.ApplyPresets(1125899872747503, 14, 9)
             case "16J/15J Tall Tales":
                 this.ApplyPresets(360709071052808, 16, 15)
             case default:
